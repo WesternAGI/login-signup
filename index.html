@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WesternAGI - Authentication</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e40af 50%, #3730a3 100%);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        /* Left Side - Branding */
+        .branding-side {
+            flex: 1;
+            padding: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .branding-side::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                linear-gradient(rgba(59, 130, 246, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(59, 130, 246, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            opacity: 0.3;
+        }
+
+        .logo-section {
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #60a5fa, #a855f7);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            font-size: 24px;
+        }
+
+        .logo h1 {
+            color: white;
+            font-size: 48px;
+            font-weight: bold;
+        }
+
+        .logo-underline {
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(135deg, #60a5fa, #a855f7);
+            border-radius: 2px;
+        }
+
+        .tagline {
+            color: white;
+            font-size: 36px;
+            font-weight: 300;
+            line-height: 1.2;
+            margin-bottom: 24px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .tagline .highlight {
+            font-weight: 600;
+            color: #93c5fd;
+        }
+
+        .description {
+            color: #bfdbfe;
+            font-size: 20px;
+            line-height: 1.6;
+            margin-bottom: 40px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .features {
+            position: relative;
+            z-index: 10;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+            color: #bfdbfe;
+        }
+
+        .feature-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 16px;
+        }
+
+        .feature-dot.blue { background-color: #60a5fa; }
+        .feature-dot.indigo { background-color: #a855f7; }
+        .feature-dot.cyan { background-color: #22d3ee; }
+
+        /* Floating elements */
+        .floating-element {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .floating-1 {
+            top: 80px;
+            left: 80px;
+            width: 16px;
+            height: 16px;
+            animation-delay: 0s;
+        }
+
+        .floating-2 {
+            top: 160px;
+            right: 120px;
+            width: 24px;
+            height: 24px;
+            animation-delay: 1s;
+        }
+
+        .floating-3 {
+            bottom: 160px;
+            left: 120px;
+            width: 20px;
+            height: 20px;
+            animation-delay: 2s;
+        }
+
+        .floating-4 {
+            bottom: 80px;
+            right: 80px;
+            width: 12px;
+            height: 12px;
+            animation-delay: 0.5s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.4; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 0.8; }
+        }
+
+        /* Right Side - Form */
+        .form-side {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            max-width: 600px;
+        }
+
+        .form-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+            padding: 48px;
+            width: 100%;
+            max-width: 480px;
+            transition: transform 0.3s ease;
+        }
+
+        .form-container:hover {
+            transform: translateY(-5px);
+        }
+
+        .form-header {
+            text-center;
+            margin-bottom: 40px;
+        }
+
+        .form-header h2 {
+            color: #1f2937;
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .form-header p {
+            color: #6b7280;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #374151;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #d1d5db;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-input.error {
+            border-color: #ef4444;
+        }
+
+        .error-message {
+            color: #ef4444;
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .checkbox {
+            margin-top: 2px;
+        }
+
+        .checkbox-label {
+            font-size: 14px;
+            color: #6b7280;
+            line-height: 1.5;
+        }
+
+        .checkbox-label a {
+            color: #3b82f6;
+            text-decoration: none;
+        }
+
+        .checkbox-label a:hover {
+            text-decoration: underline;
+        }
+
+        .forgot-password {
+            text-align: right;
+            margin-bottom: 24px;
+        }
+
+        .forgot-password a {
+            color: #3b82f6;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .toggle-section {
+            text-align: center;
+            margin-top: 32px;
+        }
+
+        .toggle-section p {
+            color: #6b7280;
+            margin-bottom: 16px;
+        }
+
+        .toggle-btn {
+            color: #3b82f6;
+            background: none;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .toggle-btn:hover {
+            text-decoration: underline;
+        }
+
+        .enterprise-notice {
+            margin-top: 32px;
+            background: #eff6ff;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .enterprise-notice p {
+            color: #1e40af;
+            font-size: 14px;
+        }
+
+        .enterprise-notice .highlight {
+            font-weight: 600;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+            }
+            
+            .branding-side {
+                display: none;
+            }
+            
+            .form-side {
+                max-width: none;
+            }
+
+            .form-container {
+                margin: 20px;
+                padding: 32px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-container {
+                margin: 10px;
+                padding: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left Side - Branding -->
+        <div class="branding-side">
+            <div class="floating-element floating-1"></div>
+            <div class="floating-element floating-2"></div>
+            <div class="floating-element floating-3"></div>
+            <div class="floating-element floating-4"></div>
+
+            <div class="logo-section">
+                <div class="logo">
+                    <div class="logo-icon">🧠</div>
+                    <h1>WesternAGI</h1>
+                </div>
+                <div class="logo-underline"></div>
+            </div>
+
+            <h2 class="tagline">
+                Powering the Future with<br>
+                <span class="highlight">Artificial General Intelligence</span>
+            </h2>
+
+            <p class="description">
+                Join thousands of innovators building tomorrow's intelligent systems with our cutting-edge AGI platform.
+            </p>
+
+            <div class="features">
+                <div class="feature-item">
+                    <div class="feature-dot blue"></div>
+                    <span>Advanced Neural Architecture</span>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-dot indigo"></div>
+                    <span>Enterprise-Grade Security</span>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-dot cyan"></div>
+                    <span>24/7 Expert Support</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Side - Auth Form -->
+        <div class="form-side">
+            <div class="form-container">
+                <div class="form-header">
+                    <h2 id="form-title">Welcome Back</h2>
+                    <p id="form-subtitle">Sign in to access your AGI dashboard</p>
+                </div>
+
+                <div id="auth-form">
+                    <!-- Name fields (signup only) -->
+                    <div id="name-fields" class="form-group hidden">
+                        <div class="form-row">
+                            <div>
+                                <label for="firstName">First Name *</label>
+                                <input type="text" id="firstName" name="firstName" class="form-input" placeholder="John">
+                                <div class="error-message" id="firstName-error"></div>
+                            </div>
+                            <div>
+                                <label for="lastName">Last Name *</label>
+                                <input type="text" id="lastName" name="lastName" class="form-input" placeholder="Doe">
+                                <div class="error-message" id="lastName-error"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Company field (signup only) -->
+                    <div id="company-field" class="form-group hidden">
+                        <label for="company">Company *</label>
+                        <input type="text" id="company" name="company" class="form-input" placeholder="Your Company Name">
+                        <div class="error-message" id="company-error"></div>
+                    </div>
+
+                    <!-- Email field -->
+                    <div class="form-group">
+                        <label for="email">Work Email *</label>
+                        <input type="email" id="email" name="email" class="form-input" placeholder="you@company.com">
+                        <div class="error-message" id="email-error"></div>
+                    </div>
+
+                    <!-- Password field -->
+                    <div class="form-group">
+                        <label for="password">Password *</label>
+                        <input type="password" id="password" name="password" class="form-input" placeholder="Enter your password">
+                        <div class="error-message" id="password-error"></div>
+                    </div>
+
+                    <!-- Confirm password field (signup only) -->
+                    <div id="confirm-password-field" class="form-group hidden">
+                        <label for="confirmPassword">Confirm Password *</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" class="form-input" placeholder="Confirm your password">
+                        <div class="error-message" id="confirmPassword-error"></div>
+                    </div>
+
+                    <!-- Terms checkbox (signup only) -->
+                    <div id="terms-field" class="form-group hidden">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="agreeToTerms" name="agreeToTerms" class="checkbox">
+                            <label for="agreeToTerms" class="checkbox-label">
+                                I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                            </label>
+                        </div>
+                        <div class="error-message" id="agreeToTerms-error"></div>
+                    </div>
+
+                    <!-- Forgot password (login only) -->
+                    <div id="forgot-password" class="forgot-password">
+                        <a href="#">Forgot your password?</a>
+                    </div>
+
+                    <!-- Submit button -->
+                    <button id="submit-btn" class="submit-btn" onclick="handleSubmit()">
+                        <span id="submit-text">Sign In to WesternAGI</span>
+                        <span>→</span>
+                    </button>
+                </div>
+
+                <!-- Toggle mode -->
+                <div class="toggle-section">
+                    <p id="toggle-text">New to WesternAGI?</p>
+                    <button id="toggle-btn" class="toggle-btn" onclick="toggleMode()">Create your account</button>
+                </div>
+
+                <!-- Enterprise notice -->
+                <div class="enterprise-notice">
+                    <p><span class="highlight">Enterprise Solutions:</span> Contact our sales team for custom AGI implementations</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isLogin = true;
+        let isLoading = false;
+
+        function toggleMode() {
+            isLogin = !isLogin;
+            clearErrors();
+            clearForm();
+            updateUI();
+        }
+
+        function updateUI() {
+            const formTitle = document.getElementById('form-title');
+            const formSubtitle = document.getElementById('form-subtitle');
+            const submitText = document.getElementById('submit-text');
+            const toggleText = document.getElementById('toggle-text');
+            const toggleBtn = document.getElementById('toggle-btn');
+            
+            const nameFields = document.getElementById('name-fields');
+            const companyField = document.getElementById('company-field');
+            const confirmPasswordField = document.getElementById('confirm-password-field');
+            const termsField = document.getElementById('terms-field');
+            const forgotPassword = document.getElementById('forgot-password');
+
+            if (isLogin) {
+                formTitle.textContent = 'Welcome Back';
+                formSubtitle.textContent = 'Sign in to access your AGI dashboard';
+                submitText.textContent = 'Sign In to WesternAGI';
+                toggleText.textContent = 'New to WesternAGI?';
+                toggleBtn.textContent = 'Create your account';
+                
+                nameFields.classList.add('hidden');
+                companyField.classList.add('hidden');
+                confirmPasswordField.classList.add('hidden');
+                termsField.classList.add('hidden');
+                forgotPassword.classList.remove('hidden');
+            } else {
+                formTitle.textContent = 'Create Account';
+                formSubtitle.textContent = 'Join the future of artificial intelligence';
+                submitText.textContent = 'Create My Account';
+                toggleText.textContent = 'Already have an account?';
+                toggleBtn.textContent = 'Sign in instead';
+                
+                nameFields.classList.remove('hidden');
+                companyField.classList.remove('hidden');
+                confirmPasswordField.classList.remove('hidden');
+                termsField.classList.remove('hidden');
+                forgotPassword.classList.add('hidden');
+            }
+        }
+
+        function clearForm() {
+            const inputs = document.querySelectorAll('.form-input');
+            inputs.forEach(input => {
+                if (input.type === 'checkbox') {
+                    input.checked = false;
+                } else {
+                    input.value = '';
+                }
+                input.classList.remove('error');
+            });
+        }
+
+        function clearErrors() {
+            const errors = document.querySelectorAll('.error-message');
+            errors.forEach(error => error.textContent = '');
+            
+            const inputs = document.querySelectorAll('.form-input');
+            inputs.forEach(input => input.classList.remove('error'));
+        }
+
+        function showError(fieldName, message) {
+            const errorElement = document.getElementById(fieldName + '-error');
+            const inputElement = document.getElementById(fieldName);
+            
+            if (errorElement) errorElement.textContent = message;
+            if (inputElement) inputElement.classList.add('error');
+        }
+
+        function validateForm() {
+            clearErrors();
+            let isValid = true;
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // Email validation
+            if (!email) {
+                showError('email', 'Email is required');
+                isValid = false;
+            } else if (!/\S+@\S+\.\S+/.test(email)) {
+                showError('email', 'Please enter a valid email address');
+                isValid = false;
+            }
+
+            // Password validation
+            if (!password) {
+                showError('password', 'Password is required');
+                isValid = false;
+            } else if (password.length < 8) {
+                showError('password', 'Password must be at least 8 characters');
+                isValid = false;
+            }
+
+            // Signup-specific validation
+            if (!isLogin) {
+                const firstName = document.getElementById('firstName').value;
+                const lastName = document.getElementById('lastName').value;
+                const company = document.getElementById('company').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                const agreeToTerms = document.getElementById('agreeToTerms').checked;
+
+                if (!firstName) {
+                    showError('firstName', 'First name is required');
+                    isValid = false;
+                }
+
+                if (!lastName) {
+                    showError('lastName', 'Last name is required');
+                    isValid = false;
+                }
+
+                if (!company) {
+                    showError('company', 'Company name is required');
+                    isValid = false;
+                }
+
+                if (password !== confirmPassword) {
+                    showError('confirmPassword', 'Passwords do not match');
+                    isValid = false;
+                }
+
+                if (!agreeToTerms) {
+                    showError('agreeToTerms', 'You must agree to the terms and conditions');
+                    isValid = false;
+                }
+            }
+
+            return isValid;
+        }
+
+        function handleSubmit() {
+            if (isLoading) return;
+
+            if (!validateForm()) return;
+
+            isLoading = true;
+            updateSubmitButton();
+
+            // Simulate API call
+            setTimeout(() => {
+                isLoading = false;
+                updateSubmitButton();
+                alert(`${isLogin ? 'Login' : 'Account creation'} successful! Welcome to WesternAGI.`);
+                clearForm();
+            }, 2000);
+        }
+
+        function updateSubmitButton() {
+            const submitBtn = document.getElementById('submit-btn');
+            const submitText = document.getElementById('submit-text');
+
+            if (isLoading) {
+                submitBtn.disabled = true;
+                submitText.innerHTML = '<div class="loading-spinner"></div>' + 
+                    (isLogin ? 'Signing In...' : 'Creating Account...');
+            } else {
+                submitBtn.disabled = false;
+                submitText.textContent = isLogin ? 'Sign In to WesternAGI' : 'Create My Account';
+            }
+        }
+
+        // Allow form submission with Enter key
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                handleSubmit();
+            }
+        });
+    </script>
+</body>
+</html>
